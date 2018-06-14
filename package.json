@@ -8,5 +8,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "async": "2.6.1",
+    "mongodb": "^2.2.35"
+  }
 }
