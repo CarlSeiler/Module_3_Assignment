@@ -5,15 +5,8 @@ const async = require('async');
 process.argv.forEach((val, index, array) => {
     console.log(`${index} : ${val}`);
 });
-let arg = process.argv[2]; // giving this global scope so I can use it later.
-try {
-    arg = Number(process.argv[2]);
-    console.log(arg);
-} catch (error) {
-    console.error(error);
-    throw new Error('Command line parameter probably not an integer.');
-}
-
+let arg = Number(process.argv[2]);
+    
 if ((typeof (arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
     // Parameter probably OK, so let's go with it.
 } else {
