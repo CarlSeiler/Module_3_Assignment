@@ -8,6 +8,7 @@ yarn-error.log*
 # test input
 m3-cust*.json
 go.sh
+m?
 
 # Runtime data
 pids
