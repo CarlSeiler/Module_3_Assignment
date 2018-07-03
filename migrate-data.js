@@ -1,20 +1,10 @@
 // migrate-data.js
 const mongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://localhost:27017/edx';
-// const Db = require('mongodb').Db;
 const asyncmodule = require('async');
-//const util = require('util');
 
 const cust_data = require('./m3-customer-data.json');
 const cust_addresses = require('./m3-customer-address-data.json');
-
-//const importdata = require('./import.js');
-//const importStuff = util.promisify(importdata.importdata);
-// async function runImport() {
-//  return await importStuff();
-// }
-
-const dbName = 'migrate';
 
 let arg = Number(process.argv[2]);
 
@@ -42,7 +32,7 @@ if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
             // of the array, in which case you end at the length of the array minus 1.
             const end = (start+limit > cust_data.length ? cust_data.length-1 : start+limit);
             tasks.push((done) =>{
-              console.log (`Inserting ${start} through ${end}.`);
+              console.log (`Inserting index ${start} through ${end-1}.`);
               customerCollection.insert(cust_data.slice (start, end), (error, results) =>{
                 done(error, results);
               });
@@ -50,12 +40,14 @@ if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
           }
         });
         console.log (`Starting ${tasks.length} tasks in parallel.`);
+        const timer1 =Date.now();
         asyncmodule.parallel (tasks, (err, results) => {
           if (err) { console.log(`Parallel task problem: ${err.message}`);
           db1.close();
           }
           else {
-
+            const timer2 = Date.now();
+            console.log ('Time elapsed: ' + timer2 - timer1 );
             db1.close();
           }
 
@@ -72,12 +64,3 @@ if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
     console.log(
           `Format is: node migrate-data.js <X>\n  Where <X> is number of entries per parallel job to migrate.`);
   }
-
-// Check to see if data has already been imported to the MongoDB database,
-// and if so, skip the import.
-
-
-//
-// console.log (db1.listCollections({name: 'cust_data'}).toArray(function(err, items) {
-//   assert.equal(1, items.length);
-// }));
