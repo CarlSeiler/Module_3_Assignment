@@ -21,7 +21,7 @@ if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
         var db1 = db.db('edx');
         var customerCollection = db1.collection('customers');
 
-        cust_data.forEach((customer, index, list) => {
+        cust_data.forEach((customer, index) => {
           cust_data[index] = Object.assign(customer, cust_addresses[index]);
           
           // As you go through the customers, if the index divides evenly into the 
