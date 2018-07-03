@@ -9,6 +9,7 @@ yarn-error.log*
 m3-cust*.json
 go.sh
 m?
+mongotest.js
 
 # Runtime data
 pids

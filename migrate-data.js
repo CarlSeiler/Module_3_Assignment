@@ -32,7 +32,7 @@ if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
             // of the array, in which case you end at the length of the array minus 1.
             const end = (start+limit > cust_data.length ? cust_data.length-1 : start+limit);
             tasks.push((done) =>{
-              console.log (`Inserting index ${start} through ${end-1}.`);
+              //console.log (`Inserting index ${start} through ${end-1}.`);
               customerCollection.insert(cust_data.slice (start, end), (error, results) =>{
                 done(error, results);
               });
@@ -47,7 +47,7 @@ if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
           }
           else {
             const timer2 = Date.now();
-            console.log ('Time elapsed: ' + timer2 - timer1 );
+            console.log (`Time elapsed:  ${timer2 - timer1}` );
             db1.close();
           }
 
