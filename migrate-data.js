@@ -31,7 +31,7 @@ if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
         var db1 = db.db('edx');
         var customerCollection = db1.collection('customers');
 
-        cust_data.array.forEach((customer, index, list) => {
+        cust_data.forEach((customer, index, list) => {
           cust_data[index] = Object.assign(customer, cust_addresses[index]);
           
           // As you go through the customers, if the index divides evenly into the 
@@ -42,14 +42,14 @@ if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
             // of the array, in which case you end at the length of the array minus 1.
             const end = (start+limit > cust_data.length ? cust_data.length-1 : start+limit);
             tasks.push((done) =>{
-              console.log (`Inserting ${start} through ${limit}.`);
+              console.log (`Inserting ${start} through ${end}.`);
               customerCollection.insert(cust_data.slice (start, end), (error, results) =>{
                 done(error, results);
               });
             });
           }
         });
-        console.log (`Starting ${tasks.length} tasks in paralle.`);
+        console.log (`Starting ${tasks.length} tasks in parallel.`);
         asyncmodule.parallel (tasks, (err, results) => {
           if (err) { console.log(`Parallel task problem: ${err.message}`);
           db1.close();
@@ -65,11 +65,13 @@ if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
 
     });
 } else {
-    // Parameter probably not OK, so let's get out of here.
+    // Parameter probably not OK, so let's get out of here and give instructions
+    // to user.
     console.log(
-        `Parameter ${process.argv[2]} missing or is not positive integer. Exiting.`
-    );
-}
+        `Parameter ${process.argv[2]} missing or is not positive integer. Exiting.`);
+    console.log(
+          `Format is: node migrate-data.js <X>\n  Where <X> is number of entries per parallel job to migrate.`);
+  }
 
 // Check to see if data has already been imported to the MongoDB database,
 // and if so, skip the import.
