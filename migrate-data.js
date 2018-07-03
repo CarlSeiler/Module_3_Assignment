@@ -1,81 +1,74 @@
 // migrate-data.js
 const mongoClient = require('mongodb').MongoClient;
+const url = 'mongodb://localhost:27017/edx';
 // const Db = require('mongodb').Db;
 const asyncmodule = require('async');
-const assert = require('assert');
-const util = require('util');
+//const util = require('util');
 
+const cust_data = require('./m3-customer-data.json');
+const cust_addresses = require('./m3-customer-address-data.json');
 
-const importdata = require('./import.js');
-const importStuff = util.promisify(importdata.importdata);
-async function runImport() {
+//const importdata = require('./import.js');
+//const importStuff = util.promisify(importdata.importdata);
+// async function runImport() {
+//  return await importStuff();
+// }
 
-  return await importStuff();
-}
-
-const url = 'mongodb://localhost:27017';
 const dbName = 'migrate';
 
 let arg = Number(process.argv[2]);
 
-if ((typeof (arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
+if ((typeof(arg) === 'number' && (arg % 1) === 0 && arg > 0)) {
     // Parameter probably OK, so let's go with it.
     // Main code goes here.
-
-    let c = [];
-    mongoClient.connect('mongodb://localhost:27017/test', function (err, db) {
-        assert.equal(null, err);
+    let tasks = [];
+    const limit = parseInt(arg); // Make sure one last time it is integer
+    mongoClient.connect(url, (err, db) =>{
+      if (err) {
+        console.log (`Connection problem: ${err.message}`);
+      }
+      else {
         var db1 = db.db('edx');
+        var customerCollection = db1.collection('customers');
 
-        // var collection = db1.collection('cust_addresses');
-        // May be a better way to do this:
-        //
-        // This checks to see if
-        // at least one of the collections exist before continuing.
-        db1.listCollections({name: 'cust_data'})
-          .next(function (err, collinfo) {
-             if (!collinfo) {
-               console.log('Importing...');
-                           runImport();
-               }
+        cust_data.array.forEach((customer, index, list) => {
+          cust_data[index] = Object.assign(customer, cust_addresses[index]);
+          
+          // As you go through the customers, if the index divides evenly into the 
+          // the limit, then push that section onto the array of tasks
+          if (index % limit == 0) {
+            const start = index;
+            // Start at current index and go through start+limit unless that goes beyond the end
+            // of the array, in which case you end at the length of the array minus 1.
+            const end = (start+limit > cust_data.length ? cust_data.length-1 : start+limit);
+            tasks.push((done) =>{
+              console.log (`Inserting ${start} through ${limit}.`);
+              customerCollection.insert(cust_data.slice (start, end), (error, results) =>{
+                done(error, results);
+              });
+            });
+          }
+        });
+        console.log (`Starting ${tasks.length} tasks in paralle.`);
+        asyncmodule.parallel (tasks, (err, results) => {
+          if (err) { console.log(`Parallel task problem: ${err.message}`);
+          db1.close();
+          }
+          else {
 
-             else {
-               console.log('Good to go. No import needed, apparently.');
-             }
-          });
-        // **************************************************************
-        // ** At this point, we should have everything we need to do the
-        // ** work.
-        // **************************************************************
-        //
-        //  TODO: Eventually get this working.  right now,
-        // Seems like the problem is this part kicks off before the
-        // Database import completes.  Even if the database has been
-        // imported before, it doesn't successfully add the recordID to the
-        // collection during the foreEach loop.  :-|
-        //
-        // *************************************************************
-        //
-        // var addrCollection = db1.collection('cust_addresses');
-        // var dataCollection = db1.collection('cust_data');
-        // var i = 0;
-        // addrCollection.find().forEach( (myDoc) => {
-        //     addrCollection.update(myDoc, {$set: {recordID: i++ }});
-        //     console.log('Updating: ' + 1);
-        // }, (error) => {
-        //   console.log ('Holy cow! An error was: ' + error);
-        // });
-        // dataCollection.find().forEach( (myDoc) => {
-        //     dataCollection.update(myDoc, {$set: {"recordID": i++ }});
-        // }, error => {
-        //   console.log ('Holy cow! An error was: ' + error);
-        // });
-        db1.close();
+            db1.close();
+          }
+
+        });
+        
+      }
+
     });
-
 } else {
     // Parameter probably not OK, so let's get out of here.
-    console.log(`Parameter ${process.argv[2]} missing or is not positive integer. Exiting.`);
+    console.log(
+        `Parameter ${process.argv[2]} missing or is not positive integer. Exiting.`
+    );
 }
 
 // Check to see if data has already been imported to the MongoDB database,
