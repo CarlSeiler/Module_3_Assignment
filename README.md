@@ -8,6 +8,7 @@ Additional requirements:
 1. nodeJS
 2. npm
 3. mongodb, usually installed globally
+4. Must have [m3-customer-data.json](https://prod-edxapp.edx-cdn.org/assets/courseware/v1/49802b4bc23bb76c0a1eb9bff4178d55/asset-v1:Microsoft+DEV283x+1T2018+type@asset+block/m3-customer-data.json) and [m3-customer-address-data.json](https://prod-edxapp.edx-cdn.org/assets/courseware/v1/e70f5903852879899f031ced3ddf0a92/asset-v1:Microsoft+DEV283x+1T2018+type@asset+block/m3-customer-address-data.json) retrieved saved in directory.  
 
 
 How to install:
