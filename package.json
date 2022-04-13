@@ -11,7 +11,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "async": "2.6.1",
+    "async": "3.2.2",
     "mongodb": "^2.2.35",
     "read-json-stream": "^1.1.0"
   }
